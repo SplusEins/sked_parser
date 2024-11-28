@@ -14,7 +14,7 @@ dependencies = [
   "lxml==4.9.4",
   "pyyaml==6.0.2",
   "requests==2.32.3",
-  "setuptools==75.2.0",
+  "setuptools==75.6.0",
 ]
 [project.license]
 file = "LICENSE"
