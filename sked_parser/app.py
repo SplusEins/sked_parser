@@ -60,9 +60,10 @@ def main(config, secrets, out_files):
             label = label.replace("\n", " ").replace("\r", " ")  # for logging purposes
             if "Informatik" in plan["faculty"]:
                 sked_path = ""
+                faculty_short = "i"
             else:
                 sked_path = absolute_path.removeprefix("https://stundenplan.ostfalia.de/")
-            faculty_short = scraper.get_faculty_shortcode(label, sked_path)
+                faculty_short = scraper.get_faculty_shortcode(label, sked_path)
             degree = scraper.guess_degree(label, sked_path)
             semester = scraper.extract_semester(label, sked_path) or "Sonstige"
             sked_id = scraper.create_id(sked_path, faculty_short, config["current_sem"], semester, label)
