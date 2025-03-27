@@ -137,7 +137,7 @@ def get_faculty_shortcode(desc, sked_path):
         return shortcode
     if "Informatik" in desc or "Digital Technologies" in desc or "Wirtschaftsinformatik" in desc:
         return "i"
-    raise Exception("Could not get faculty shorthand from sked path")
+    raise Exception(f"Could not get faculty shorthand from sked path '{sked_path}' or description '{desc}'")
 
 
 def optimize_label(desc, uses_shorthand_syntax):
