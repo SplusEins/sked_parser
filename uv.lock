@@ -154,11 +154,11 @@ wheels = [
 
 [[package]]
 name = "jsonpickle"
-version = "4.0.4"
+version = "4.0.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/10/7f/53c5534899311d1b76d524c7dcb99ba1f31fcf153204a482d97c15da27d7/jsonpickle-4.0.4.tar.gz", hash = "sha256:2ac818e5dfc316b57fb7a86641c1c84d21b8f355518054ffe7f697be078f2f63", size = 315600 }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/33/4bda317ab294722fcdfff8f63aab74af9fda3675a4652d984a101aa7587e/jsonpickle-4.0.5.tar.gz", hash = "sha256:f299818b39367c361b3f26bdba827d4249ab5d383cd93144d0f94b5417aacb35", size = 315661 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/45/6df4d4ac5cc733d822dd22a94a82b5f8fab974c62ddd62d12d122f07b29f/jsonpickle-4.0.4-py3-none-any.whl", hash = "sha256:356c42ca5b03e371b6cf527d588bfddfe35109cdd1acbb455428f44cbc16a36e", size = 46374 },
+    { url = "https://files.pythonhosted.org/packages/dc/1b/0e79cf115e0f54f1e8f56effb6ffd2ef8f92e9c324d692ede660067f1bfe/jsonpickle-4.0.5-py3-none-any.whl", hash = "sha256:b4ac7d0a75ddcdfd93445737f1d36ff28768690d43e54bf5d0ddb1d915e580df", size = 46382 },
 ]
 
 [[package]]
@@ -461,7 +461,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = "==4.13.3" },
-    { name = "jsonpickle", specifier = "==4.0.4" },
+    { name = "jsonpickle", specifier = "==4.0.5" },
     { name = "lxml", specifier = "==5.3.1" },
     { name = "pyyaml", specifier = "==6.0.2" },
     { name = "requests", specifier = "==2.32.3" },
