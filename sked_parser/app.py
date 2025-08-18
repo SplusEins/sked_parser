@@ -71,6 +71,9 @@ def main(config, secrets, out_files):
             plan_type = plan.get("type", "graphical")
             if "alt" in sked_path:
                 label += " alt"
+            if label == "":
+                log.warning(f"Label for {absolute_path} is empty, using sked_path as label.")
+                label = sked_path
             tables.append(
                 dict(
                     timetablePath=absolute_path,
