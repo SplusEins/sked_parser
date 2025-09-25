@@ -83,7 +83,7 @@ def create_id(sked_path, faculty_short, current_sem_str, extracted_semester, lab
     sked_id = sked_id.replace("bachelor", "")
     sked_id = sked_id.replace("b_sc", "")
     sked_id = sked_id.replace("m_sc", "m")
-    # sked_id = sked_id.replace("master_of_science", "master")
+    sked_id = sked_id.replace("master_of_science", "master")
     sked_id = sked_id.replace("energie_", "")
     sked_id = sked_id.replace("umwelt_", "")
     sked_id = sked_id.replace("stdgrp_", "")  # weird faculty S specific string

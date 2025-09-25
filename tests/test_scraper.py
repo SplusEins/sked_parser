@@ -111,6 +111,16 @@ def test_optimize_label_strip_semester():
     assert optimize_label(in_str, False) == "WI"
 
 
+def test_optimize_label():
+    """Verify the semester is correctly stripped from the label"""
+    # mit of Science
+    in_str = "Bachelor of Science Informatik"
+    assert optimize_label(in_str, False) == "Informatik"
+    # ohne of Science
+    in_str = "Master Informatik"
+    assert optimize_label(in_str, False) == "Informatik"
+
+
 def test_optimize_label_shorthand_strip():
     """Verify that the shorthand is correctly used instead of the longform if requested"""
     # Simple shorthand and text after it
