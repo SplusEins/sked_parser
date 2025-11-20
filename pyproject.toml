@@ -28,5 +28,5 @@ include = ["sked_parser"]
 [tool.ruff]
 line-length = 140
 
-[tool.uv]
-dev-dependencies = ["pytest~=9.0.1", "requests-cache>=1.2.1", "ruff>=0.6.9"]
+[dependency-groups]
+dev = ["pytest>=9.0.1", "requests-cache>=1.2.1", "ruff>=0.6.9"]

@@ -6,7 +6,6 @@ import os
 import sys
 from pathlib import Path
 
-import pkg_resources
 import yaml
 
 from sked_parser import app
@@ -39,6 +38,7 @@ def main():
         "--config-file",
         type=str,
         help="Path to the main yaml configuration file. Defaults to the provided `sked_parser/config.yaml`",
+        required=True,
     )
     parser.add_argument(
         "-s",
@@ -57,12 +57,7 @@ def main():
     args = parser.parse_args()
 
     # Config contains the urls and other configuration.
-    if args.config_file is None:
-        # If file is not specified, use the package-provided config file
-        config = yaml.safe_load(pkg_resources.resource_string(__name__, "config.yaml"))
-    else:
-        # Load from the specified file
-        config = load_yaml_conf(Path(args.config_file).resolve())
+    config = load_yaml_conf(Path(args.config_file).resolve())
 
     # Load username and password to access ostfalia sked URLs either from yaml if exists or from environment
     secrets = {}
