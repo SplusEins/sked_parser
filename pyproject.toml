@@ -7,7 +7,7 @@ name = "sked-parser"
 version = "1.1.0"
 description = "Parses Ostfalia sked timetables into JSON"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = [
   "beautifulsoup4==4.14.2",
   "jsonpickle==4.1.1",

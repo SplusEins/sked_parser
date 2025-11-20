@@ -6,7 +6,7 @@ Parses Ostfalia University [`sked`](https://www.sked.de/) timetables into a JSON
 
 # Installation & Usage
 
-1. Install python>=3.9, git and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+1. Install python, git and [uv](https://docs.astral.sh/uv/getting-started/installation/)
 2. Clone this repository: `git clone https://github.com/SplusEins/sked_parser.git` and `cd sked_parser`.
 3. Install the tool: `uv sync`.
 4. Copy `secrets.example.yaml` into `secrets.yaml` and fill it with your Ostfalia credentials.
@@ -19,17 +19,17 @@ This is how the file looks like:
 
 ```yaml
 plans:
-    - url: https://stundenplan.ostfalia.de/e/ # Required, the "overview" URL which directly lists the single timetables for that faculty
-      faculty: Elektrotechnik # Required, faculty name which will be displayed to the user on spluseins.de
-    - url: https://stundenplan.ostfalia.de/i/Semester/Semester-Liste/
-      faculty: Informatik
-      type: "list" # Optional, defaults to 'graphical'. Only needs to be specified as 'list' if the timetables are in list form or as 'csv' if the timetables are stored as CSV.
-    - url: https://stundenplan.ostfalia.de/v/stundenplan/bee/
-      faculty: Versorgungstechnik
-      shorthand_syntax: True # Optional, defaults to false. See section shorthand syntax further below.
+  - url: https://stundenplan.ostfalia.de/e/ # Required, the "overview" URL which directly lists the single timetables for that faculty
+    faculty: Elektrotechnik # Required, faculty name which will be displayed to the user on spluseins.de
+  - url: https://stundenplan.ostfalia.de/i/Semester/Semester-Liste/
+    faculty: Informatik
+    type: "list" # Optional, defaults to 'graphical'. Only needs to be specified as 'list' if the timetables are in list form or as 'csv' if the timetables are stored as CSV.
+  - url: https://stundenplan.ostfalia.de/v/stundenplan/bee/
+    faculty: Versorgungstechnik
+    shorthand_syntax: True # Optional, defaults to false. See section shorthand syntax further below.
 current_sem: "ss21" # Current semester string that will be appended to the IDs (to have unique IDs for each semester)
 timetable_blacklist:
-    - "blacklisted timetable name or URL"
+  - "blacklisted timetable name or URL"
 ```
 
 Refer to the [SplusEins Documentation](https://spluseins-i.ostfalia.de/docs/semesterbeginn.html#aktualisierung-der-plane) for details on the resulting JSON format.
@@ -38,9 +38,9 @@ Refer to the [SplusEins Documentation](https://spluseins-i.ostfalia.de/docs/seme
 
 usage: `sked-parser [-h] [-c CONFIG_FILE] [-s SECRETS_FILE] [-o OUT_FILE]`
 
--   `-c CONFIG_FILE`: Path to the main yaml configuration file. Defaults to the provided `sked_parser/config.yaml`.
--   `-s SECRETS_FILe` Path to the YAML secrets file containing Ostfalia user and password (Default: `secrets.yaml` in current directory)
--   `-o OUT_FILE` Where to store the resulting json file. Can be specified multiple times (Default: `timetables.json` in current directory)
+- `-c CONFIG_FILE`: Path to the main yaml configuration file. Defaults to the provided `sked_parser/config.yaml`.
+- `-s SECRETS_FILe` Path to the YAML secrets file containing Ostfalia user and password (Default: `secrets.yaml` in current directory)
+- `-o OUT_FILE` Where to store the resulting json file. Can be specified multiple times (Default: `timetables.json` in current directory)
 
 It's also possible to specify the Ostfalia credentials via `OSTFALIA_USER` and `OSTFALIA_PASS` environment variables.
 
