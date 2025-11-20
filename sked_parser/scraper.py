@@ -128,7 +128,7 @@ def extract_semester(desc, url):
         # Use the semester from URL if description search was unsuccessful
         return int(m_url.group(1))
     else:
-        log.warning(f'Kein Semester bestimmbar bei "{desc}" mit sked path "{url}"')
+        log.warning(f'Could not detect semester for "{desc}" (sked path is"{url}")')
         return None
 
 
@@ -182,7 +182,7 @@ def guess_degree(desc, link):
     if "-m-" in link or "_m_" in link or "_ma_" in link or "-ma-" in link:
         if "studienprofil m" in desc.lower():
             return "Bachelor"
-        log.info(f"Master vermutet für '{desc}'. Bitte manuell überprüfen, dass es kein Bachelor ist. Link ist {link}.")
+        log.info(f"Assuming 'Master' for '{desc}'. Make sure it's not a wrongly detected Bachelor. URL is {link}.")
         return "Master"
     else:
         return "Bachelor"

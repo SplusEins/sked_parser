@@ -55,7 +55,7 @@ def main(config, secrets, out_files):
     for plan in config["plans"]:
         tuples = scraper.get_links(plan["url"], secrets, plan["faculty"])
         if len(tuples) == 0:
-            log.warning(f"URL {plan['url']} hat keine Pläne.")
+            log.warning(f"No plans detected at URL {plan['url']}")
         for label, absolute_path in tuples:
             label = label.replace("\n", " ").replace("\r", " ")  # for logging purposes
             if "Informatik" in plan["faculty"]:
@@ -72,7 +72,7 @@ def main(config, secrets, out_files):
             if "alt" in sked_path:
                 label += " alt"
             if label == "":
-                log.warning(f"Label for {absolute_path} is empty, using unqiue ID as label.")
+                log.warning(f"Label empty for URL {absolute_path}. Using unqiue ID as label instead.")
                 label = sked_id
             tables.append(
                 dict(
