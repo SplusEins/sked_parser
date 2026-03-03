@@ -38,13 +38,21 @@ def get_links(overview_url: str, auth, faculty=""):
         valid_url_regex = re.compile(r"^https://stundenplan.ostfalia.de/\w/.+\.(html|csv)$", re.IGNORECASE)
     for anchor_tag_href in soup.find_all("a", href=True):
         absolute_url: str = urljoin(overview_url, anchor_tag_href["href"])
+        # some URLs contain spaces, which is not valid and leads to errors when trying to access them,
+        # so replace them with %20
+        absolute_url = absolute_url.strip()
+        absolute_url = absolute_url.replace(" ", "%20")
         if absolute_url.endswith("index.html"):
             continue
         if valid_url_regex.match(absolute_url):
             desc: str = anchor_tag_href.text.strip()
             # Prepend the content of the previous paragraph to the description because it contains the real name of the plan
             if "Wirtschaft" in faculty:
-                desc = anchor_tag_href.parent.parent.find("summary").text.strip() + " " + desc
+                desc = anchor_tag_href.find_parent("section").find("h1").text.strip() + " " + desc # Degree
+                desc = anchor_tag_href.parent.find("h3").text.strip() + " " + desc # Semester
+                desc = anchor_tag_href.parent.find("h3").next_sibling.text.strip() + " " + desc # Group (optional)
+                desc = anchor_tag_href.parent.parent.parent.find("big").text.strip() + " " + desc # Focus
+                desc = re.sub(r'\b(\w+)\s+\1\b', r'\1', desc) # WPF is duplicated because Focus and Semester is the same...
             if "Recht" in faculty:
                 if anchor_tag_href.parent.parent.name == "ol":
                     desc = anchor_tag_href.parent.parent.previous + " " + desc
