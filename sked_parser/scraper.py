@@ -48,11 +48,11 @@ def get_links(overview_url: str, auth, faculty=""):
             desc: str = anchor_tag_href.text.strip()
             # Prepend the content of the previous paragraph to the description because it contains the real name of the plan
             if "Wirtschaft" in faculty:
-                desc = anchor_tag_href.find_parent("section").find("h1").text.strip() + " " + desc # Degree
-                desc = anchor_tag_href.parent.find("h3").text.strip() + " " + desc # Semester
-                desc = anchor_tag_href.parent.find("h3").next_sibling.text.strip() + " " + desc # Group (optional)
-                desc = anchor_tag_href.parent.parent.parent.find("big").text.strip() + " " + desc # Focus
-                desc = re.sub(r'\b(\w+)\s+\1\b', r'\1', desc) # WPF is duplicated because Focus and Semester is the same...
+                desc = anchor_tag_href.find_parent("section").find("h1").text.strip() + " " + desc  # Degree
+                desc = anchor_tag_href.parent.find("h3").text.strip() + " " + desc  # Semester
+                desc = anchor_tag_href.parent.find("h3").next_sibling.text.strip() + " " + desc  # Group (optional)
+                desc = anchor_tag_href.parent.parent.parent.find("big").text.strip() + " " + desc  # Focus
+                desc = re.sub(r"\b(\w+)\s+\1\b", r"\1", desc)  # WPF is duplicated because Focus and Semester is the same...
             if "Recht" in faculty:
                 if anchor_tag_href.parent.parent.name == "ol":
                     desc = anchor_tag_href.parent.parent.previous + " " + desc
