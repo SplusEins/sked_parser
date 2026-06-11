@@ -13,7 +13,7 @@ dependencies = [
   "jsonpickle==4.1.2",
   "lxml==6.1.1",
   "pyyaml==6.0.3",
-  "requests==2.32.5",
+  "requests==2.34.2",
   "setuptools==80.9.0",
 ]
 [project.license]
