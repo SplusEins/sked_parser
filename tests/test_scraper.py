@@ -1,3 +1,6 @@
+import csv
+from pathlib import Path
+
 from sked_parser.scraper import (
     create_id,
     extract_semester,
@@ -5,39 +8,50 @@ from sked_parser.scraper import (
     guess_degree,
 )
 
-
-def test_extract_semester_normal():
-    """Test normal/default string"""
-    sem_str = "Angewandte Informatik - 1. Semester"
-    assert extract_semester(sem_str, "") == 1
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def test_extract_semester_multiple_numbers():
-    """Test string with other numbers"""
-    sem_str = "Wasser- und Bodenmanagement - PO 2018 - 3. Semester"
-    assert extract_semester(sem_str, "") == 3
-    sem_str = "Wasser- und Bodenmanagement - 20. Sem"
-    assert extract_semester(sem_str, "") is None
+def test_extract_semester_digit_before_sem():
+    """Faculties F, S, V, W write the digit in front of "Sem" (the most common convention)"""
+    assert extract_semester("Angewandte Informatik - 1. Semester", "") == 1
+    assert extract_semester("1. Sem. EIT", "") == 1
+    assert extract_semester("1 Sem Informatik", "") == 1
+    assert extract_semester("IVG_1_1.Sem", "") == 1
+    assert extract_semester("2. Fachsemester Smart Vehicle Systems", "") == 2
+    assert extract_semester("Nothing in here", "i/Semester/Semester-Liste/I-B.Sc. WI 1. Sem..html") == 1
+    # URL escaped spaces must not hide the semester
+    assert extract_semester("", "s/wp/WS202627/Bachelor%20Soziale%20Arbeit_3_3.%20Sem.html") == 3
 
 
-def test_extract_semester_abbrevation():
-    """Test string with shortened Sem."""
-    sem_str = "1. Sem. EIT"
-    assert extract_semester(sem_str, "") == 1
+def test_extract_semester_digit_glued_to_shorthand():
+    """Faculties E, G and M glue the semester digit directly onto the course shorthand"""
+    assert extract_semester("", "e/semester/E-EIT-GS-Sem1.html") == 1
+    assert extract_semester("", "g/wp/BMRD1_WS2627.html") == 1
+    assert extract_semester("BM-WiSe2026 (PO2018) - BM4a", "m/sem/BM4a%20(PO2018).html") == 4
+    assert extract_semester("BDE-WiSe2026 (PO2025) - BDE6_SP", "m/sem/BDE6_SP%20(PO2025).html") == 6
+    assert extract_semester("BWi-WiSe2026 (PO2025) - BWi1b", "m/sem/BWi1b%20(PO2025).html") == 1
+    assert extract_semester("BM-WiSe2026 (PO2018) - BM3", "m/sem/BM3%20(PO2018).html") == 3
+    assert extract_semester("BM-WiSe2026 (PO2018) - BM7_P&L", "m/sem/BM7_P&L%20(PO2018).html") == 7
 
 
-def test_extract_semester_no_delimiter():
-    """Test that strings with no delimiter or non-digit after number match as well"""
-    sem_str = "IVG_1_1.Sem"
-    assert extract_semester(sem_str, "") == 1
-    sem_str = "1 Sem Informatik"
-    assert extract_semester(sem_str, "") == 1
+def test_extract_semester_digit_at_end_of_url():
+    """Faculties B, H, K and R only put the digit at the very end of the file name"""
+    assert extract_semester("Nothing in here", "r/studentenset/23-03-r-b-rfs-2.html") == 2
+    assert extract_semester("", "b/wp/ws26_b_stgrp_ai_1.html") == 1
+    assert extract_semester("", "h/lvp/wp/h_stdgrp_soa_2.html") == 2
+    assert extract_semester("", "k/prod/vorlesungsplaene/wp/ws/stjg_ap_5.html") == 5
+    # A digit in the middle is not a semester, it's part of the date prefix
+    assert extract_semester("Nothing in here", "r/studentenset/23-2-r-b-rfs.html") is None
 
 
-def test_extract_semester_no_semester():
-    """Test string without semester returns a string, not an int"""
-    sem_str = "IMES Teilzeit 2018"
-    assert extract_semester(sem_str, "") is None
+def test_extract_semester_ignores_year_numbers():
+    """Years must never be mistaken for a semester, no matter how they are written"""
+    assert extract_semester("IMES Teilzeit 2018", "") is None
+    assert extract_semester("MSE-WiSe2026 - MSE", "m/sem/MSE.html") is None
+    assert extract_semester("BM-WiSe2026 (PO2018) - BM4a", "") == 4
+    assert extract_semester("Wasser- und Bodenmanagement - PO 2018 - 3. Semester", "") == 3
+    # Two digit "semesters" don't exist, so this is some other number
+    assert extract_semester("Wasser- und Bodenmanagement - 20. Sem", "") is None
 
 
 def test_extract_semester_duplicated_sem():
@@ -61,26 +75,32 @@ def test_extract_semester_wahlpflicht():
     assert extract_semester(sem_str, "") == "WPF"
 
 
-def test_extract_semester_url_fallback():
-    """Test that URL parsing is used when no desc is provided"""
-    url_str = "i/Semester/Semester-Liste/I-B.Sc. WI 1. Sem..html"
-    assert extract_semester("Nothing in here", url_str) == 1
+def test_extract_semester_corpus():
+    """Golden test over every timetable URL spluseins published since 2020, from its timetables.json git history.
 
-
-def test_extract_semester_url_digit_at_end():
-    """Test that URL parsing with digit at end works"""
-    url_str = "r/studentenset/23-03-r-b-rfs-2.html"
-    assert extract_semester("Nothing in here", url_str) == 2
-
-
-def test_extract_semester_url_no_digit_in_middle():
-    url_str = "r/studentenset/23-2-r-b-rfs.html"
-    assert extract_semester("Nothing in here", url_str) is None
-
-
-def test_extract_semester_fachsemester_string():
-    sem_str = "2. Fachsemester Smart Vehicle Systems"
-    assert extract_semester(sem_str, "") == 2
+    `extracted` is what extract_semester(desc="", sked_path) returned when the fixture was written, so a diff
+    there is the full blast radius of a pattern change. Prüfungen never enter the corpus because the blacklist
+    keeps them out of timetables.json, room plans and URLs Ostfalia recycled across terms are dropped by hand.
+    """
+    # regenerate: take (timetablePath, semester) from every revision of spluseins' server/assets/timetables.json,
+    # dedupe by path, fill `extracted` via extract_semester, then drop Raumbelegung plans (their number is a room,
+    # not a semester, and they are no longer scraped) and rows where both columns are numbers but disagree
+    with open(FIXTURES / "url_semesters.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    changed, contradictions = [], []
+    for row in rows:
+        got = extract_semester("", row["sked_path"])
+        got_str = "" if got is None else str(got)
+        if got_str != row["extracted"]:
+            changed.append(f"{row['sked_path']}: fixture says {row['extracted']!r}, got {got_str!r} (spluseins: {row['published']!r})")
+        if got_str.isdigit() and row["published"].isdigit() and got_str != row["published"]:
+            contradictions.append(f"{row['sked_path']}: spluseins published {row['published']!r}, got {got_str!r}")
+    assert not contradictions, "Semester extracted from the URL contradicts what spluseins published for {} URLs:\n{}".format(
+        len(contradictions), "\n".join(contradictions[:40])
+    )
+    assert not changed, "Semester extraction changed for {} of {} URLs, review and regenerate the fixture:\n{}".format(
+        len(changed), len(rows), "\n".join(changed[:40])
+    )
 
 
 def test_optimize_label_strip_semester():
@@ -119,6 +139,9 @@ def test_optimize_label():
     # ohne of Science
     in_str = "Master Informatik"
     assert optimize_label(in_str, False) == "Informatik"
+    # WiSe/SoSe year token is stripped (faculty M)
+    assert optimize_label("BM-WiSe2026 (PO2018) - BM4a", False) == "BM (PO2018) - BM4a"
+    assert optimize_label("Handel - WiSe 21/22", False) == "Handel"
 
 
 def test_optimize_label_shorthand_strip():
@@ -170,3 +193,5 @@ def test_is_master():
         return f"e/semester/{part_str}.html"
 
     assert guess_degree("", sked_path("b_stgrp_ma_glob_1")) == "Master"
+    # Faculty M master programme "MSE" has no master/_m_ token in path or label
+    assert guess_degree("MSE-WiSe2026 - MSE", "m/sem/MSE.html") == "Master"

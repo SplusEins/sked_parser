@@ -116,6 +116,18 @@ def create_id(sked_path, faculty_short, current_sem_str, extracted_semester, lab
     return sked_id
 
 
+# One pattern per naming convention Ostfalia uses, tried in order until one matches.
+# The lookarounds keep multi digit numbers (years like WiSe2026, PO2018, WS2627, "20. Sem") out.
+SEMESTER_PATTERNS = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        r"(?<!\d)(\d)[\W_]+(?:fach)?sem",  # "1. Semester", "2. Fachsem.", "1_Sem_AE" (faculties F, S, V, W)
+        r"[a-z]{2,}(\d)(?!\d)",  # "Sem1", "BM4a", "BDE6_SP", "BMRD1" (faculties E, G, M)
+        r"(?<!\d)(\d)\W+html$",  # "h_stdgrp_soa_2.html" (faculties B, H, K, R)
+    )
+)
+
+
 def extract_semester(desc, url):
     """Extract/guess the current semester from the link description or the link using regex."""
     # Find any timetables that are "Wahlpflichfächer"
@@ -126,18 +138,14 @@ def extract_semester(desc, url):
     for keyword in ["gremien", "termine"]:
         if keyword in desc.lower() or keyword in url.lower():
             return None
-    # Try to extract the semester by finding a number followed by non word characters and something starting with Sem
-    sem_regex = re.compile(r"(?:^|\D)(\d)\W+(fachsem|sem|html$)", re.IGNORECASE)
-    m_desc = sem_regex.search(desc)
-    m_url = sem_regex.search(url)
-    if m_desc:
-        return int(m_desc.group(1))
-    elif m_url:
-        # Use the semester from URL if description search was unsuccessful
-        return int(m_url.group(1))
-    else:
-        log.warning(f'Could not detect semester for "{desc}" (sked path is"{url}")')
-        return None
+    # The description is preferred because a URL is sometimes reused across terms with a stale semester in it
+    for haystack in (desc, unquote(url)):
+        for pattern in SEMESTER_PATTERNS:
+            m = pattern.search(haystack)
+            if m:
+                return int(m.group(1))
+    log.warning(f'Could not detect semester for "{desc}" (sked path is"{url}")')
+    return None
 
 
 def get_faculty_shortcode(desc, sked_path):
@@ -160,7 +168,7 @@ def optimize_label(desc, uses_shorthand_syntax):
     desc = desc.replace("Bachelor", "")
     desc = desc.replace("Master of Science", "")
     desc = desc.replace("Master", "")
-    desc = desc.replace("- WiSe 21/22", "")
+    desc = re.sub(r"[-\s]*(?:WiSe|SoSe)\s*[\d/]+", "", desc, flags=re.IGNORECASE)  # e.g. "- WiSe 21/22", "BM-WiSe2026"
     desc = desc.replace(".csv", "")
     desc = re.sub(r"\s+", " ", desc)  # replace all (even duplicated) whitespaces by single space
     if uses_shorthand_syntax:
@@ -185,7 +193,7 @@ def optimize_label(desc, uses_shorthand_syntax):
 def guess_degree(desc, link):
     """Return an estimation whether it's a master or bachelor degree"""
     link = link.lower()
-    if "master" in desc.lower() or "m.sc" in desc.lower() or "imes" in desc.lower() or "IST" in desc or "IVG" in desc:
+    if "master" in desc.lower() or "m.sc" in desc.lower() or "imes" in desc.lower() or "IST" in desc or "IVG" in desc or "MSE" in desc:
         return "Master"
     if "-m-" in link or "_m_" in link or "_ma_" in link or "-ma-" in link:
         if "studienprofil m" in desc.lower():
