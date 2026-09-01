@@ -22,6 +22,23 @@ def raise_for_duplicated_ids(dict_to_check):
         log.critical(f"Zwei oder mehr Pläne haben die gleiche ID bekommen: {duplicated_ids}")
 
 
+def deduplicate_ids(dict_to_check):
+    """Make IDs unique by appending a counter, because Ostfalia publishes plans whose URLs only
+    differ in a part create_id strips away. Sorted by URL so the same input always gives the same IDs."""
+    taken = set()
+    for item in sorted(dict_to_check, key=lambda x: x["timetablePath"]):
+        base = item["id"]
+        if base not in taken:
+            taken.add(base)
+            continue
+        counter = 2
+        while f"{base}_{counter}" in taken:
+            counter += 1
+        item["id"] = f"{base}_{counter}"
+        taken.add(item["id"])
+        log.warning(f"ID '{base}' is already taken, using '{item['id']}' for {item['timetablePath']} instead.")
+
+
 def remove_duplicated_urls(dict_to_check):
     """Remove all timetables entries that have a duplicated URL/timetablePath. We always just use the first one."""
     unique_urls = []
@@ -99,6 +116,7 @@ def main(config, secrets, out_files):
         ),
     )
     remove_duplicated_urls(tables)
+    deduplicate_ids(tables)
     raise_for_duplicated_ids(tables)
     for out_file in out_files:
         write_timetable_json(tables, out_file)
