@@ -84,7 +84,7 @@ def main(config, secrets, out_files):
             degree = scraper.guess_degree(label, sked_path)
             semester = scraper.extract_semester(label, sked_path) or "Sonstige"
             sked_id = scraper.create_id(sked_path, faculty_short, config["current_sem"], semester, label)
-            label = scraper.optimize_label(label, plan.get("shorthand_syntax", False))
+            label = scraper.optimize_label(label, plan.get("shorthand_syntax", False), semester)
             plan_type = plan.get("type", "graphical")
             if "alt" in sked_path:
                 label += " alt"

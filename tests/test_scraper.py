@@ -131,6 +131,16 @@ def test_optimize_label_strip_semester():
     assert optimize_label(in_str, False) == "WI"
 
 
+def test_optimize_label_strip_bare_semester_number_and_arrow():
+    """Verify a bare semester number and trailing arrow glyph are stripped, using the already-parsed semester"""
+    assert optimize_label("2 Fahrzeugtechnik - Elektromobilität →", False, semester=2) == "Fahrzeugtechnik - Elektromobilität"
+    assert optimize_label("Angewandte Informatik - 1", False, semester=1) == "Angewandte Informatik"
+    assert optimize_label("Automotive Engineering →", False, semester=1) == "Automotive Engineering"
+    assert optimize_label("Angewandte Informatik - 1", False) == "Angewandte Informatik - 1"
+    assert optimize_label("Präventive Soziale Arbeit - Schwerpunkt 1", False, semester=1) == "Präventive Soziale Arbeit - Schwerpunkt 1"
+    assert optimize_label("BDE (PO2021) - BDE3", False, semester=3) == "BDE (PO2021) - BDE3"
+
+
 def test_optimize_label():
     """Verify the semester is correctly stripped from the label"""
     # mit of Science

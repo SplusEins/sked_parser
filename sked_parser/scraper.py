@@ -158,8 +158,9 @@ def get_faculty_shortcode(desc, sked_path):
     raise Exception(f"Could not get faculty shorthand from sked path '{sked_path}' or description '{desc}'")
 
 
-def optimize_label(desc, uses_shorthand_syntax):
-    """Optimize the user visible label by removing faculty names and try to use only the shorthand of that course if possible"""
+def optimize_label(desc, uses_shorthand_syntax, semester=None):
+    """Optimize the user visible label by removing faculty names and try to use only the shorthand of that course if possible.
+    `semester` is the value extract_semester() returned for this label, used to strip a bare semester number."""
     desc = desc.replace("S-", "")
     desc = desc.replace("I-", "")
     desc = desc.replace("B.Sc.", "")
@@ -183,6 +184,13 @@ def optimize_label(desc, uses_shorthand_syntax):
     # Remove any semester related information
     desc = re.sub(r"(\d\. ?-)?-? ?\d\.?\W+(Fachs|S)em(?:ester|\.)?", "", desc)
     desc = desc.replace("Semester", "")
+    # Remove trailing arrows some faculties glue onto the link text, e.g. "Fahrzeugtechnik →"
+    desc = re.sub(r"[←-⇿]+$", "", desc)
+    if isinstance(semester, int):
+        num = re.escape(str(semester))
+        desc = re.sub(rf"^{num}\s+", "", desc)
+        # dash-separated only, so a name like "Schwerpunkt 1" survives even when semester == 1
+        desc = re.sub(rf"-\s*{num}$", "", desc)
     # Strip any remaining single digits
     desc = re.sub(r"[_-]\d(?=_|$)", "", desc)
     # Remove duplicated spaces
