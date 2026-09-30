@@ -33,7 +33,7 @@ def get_links(overview_url: str, auth, faculty=""):
     soup = BeautifulSoup(resp.content, "lxml")
     tables: set[tuple[str, str]] = set()
     if "Informatik" in faculty:
-        valid_url_regex = re.compile(r"^https://intranet-i.ostfalia.de/fips/stundenplan/\d+\.html$", re.IGNORECASE)
+      valid_url_regex = re.compile(r"^https://intranet-i.ostfalia.de/fips/stundenplan/d+(?:_optional)?\.html$", re.IGNORECASE)
     else:
         valid_url_regex = re.compile(r"^https://stundenplan.ostfalia.de/\w/.+\.(html|csv)$", re.IGNORECASE)
     for anchor_tag_href in soup.find_all("a", href=True):
