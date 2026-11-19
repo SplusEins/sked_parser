@@ -18,6 +18,15 @@ session = requests.Session()
 session.headers.update({"User-Agent": "Sked parser for spluseins.de", "From": "team@spluseins.de"})
 
 
+def anchor_description(anchor_tag):
+    """Link text, or the title if the text holds no name (faculty E links are just "4. Sem.")."""
+    text = anchor_tag.text.strip()
+    if re.sub(r"(fach)?sem(ester)?|[\W\d_]", "", text, flags=re.IGNORECASE):
+        return text
+    title = re.sub(r"^Stundenplan\s*", "", anchor_tag.get("title", "").strip(), flags=re.IGNORECASE)
+    return title or text
+
+
 def get_links(overview_url: str, auth, faculty=""):
     """Scrape all valid timetable URLS from `overview_url`.
 
@@ -45,7 +54,7 @@ def get_links(overview_url: str, auth, faculty=""):
         if absolute_url.endswith("index.html"):
             continue
         if valid_url_regex.match(absolute_url):
-            desc: str = anchor_tag_href.text.strip()
+            desc: str = anchor_description(anchor_tag_href)
             # Prepend the content of the previous paragraph to the description because it contains the real name of the plan
             if "Wirtschaft" in faculty:
                 desc = anchor_tag_href.find_parent("section").find("h1").text.strip() + " " + desc  # Degree

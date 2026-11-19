@@ -1,7 +1,10 @@
 import csv
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 from sked_parser.scraper import (
+    anchor_description,
     create_id,
     extract_semester,
     optimize_label,
@@ -205,3 +208,23 @@ def test_is_master():
     assert guess_degree("", sked_path("b_stgrp_ma_glob_1")) == "Master"
     # Faculty M master programme "MSE" has no master/_m_ token in path or label
     assert guess_degree("MSE-WiSe2026 - MSE", "m/sem/MSE.html") == "Master"
+
+
+def _anchor(html):
+    return BeautifulSoup(html, "lxml").find("a")
+
+
+def test_anchor_description_falls_back_to_title_for_bare_semester():
+    a = _anchor('<a title="Stundenplan 4. Semester EIT(iP) AT" href="x">4. Sem.</a>')
+    assert anchor_description(a) == "4. Semester EIT(iP) AT"
+    assert optimize_label(anchor_description(a), False, semester=4) == "EIT(iP) AT"
+    a = _anchor('<a title="Stundenplan 6. Semester WEIT(iP)" href="x">6. Sem.</a>')
+    assert optimize_label(anchor_description(a), False, semester=6) == "WEIT(iP)"
+    for text in ["4", "Sem 4", "4. Semester", "4. Fachsem.", ""]:
+        assert anchor_description(_anchor(f'<a title="Stundenplan EIT AT" href="x">{text}</a>')) == "EIT AT"
+
+
+def test_anchor_description_keeps_link_text():
+    a = _anchor('<a title="Stundenplan Grundstudium 1. Sem EITiP" href="x">EITiP</a>')
+    assert anchor_description(a) == "EITiP"
+    assert anchor_description(_anchor('<a href="x">4. Sem.</a>')) == "4. Sem."
